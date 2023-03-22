@@ -362,10 +362,10 @@ h2 {
     position: fixed;
     top: 0;
     right: 0;
-    width: 100px;
+    width: 30px;
     background-color: #f8f8f8;
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 5px;
     justify-items: center;
   }
 
