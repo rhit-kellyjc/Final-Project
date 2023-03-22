@@ -54,7 +54,9 @@ function startTimer() {
   // Only start a new interval if the timer isn't already running
   if (!intervalId) {
     intervalId = setInterval(updateTimer, 1000);
+    updateTimer(); // Call updateTimer() immediately after setting up the interval
   }
+
 }
 
 // Pause the timer

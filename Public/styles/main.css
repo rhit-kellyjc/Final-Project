@@ -369,16 +369,11 @@ h2 {
     justify-items: center;
   }
 
-  /* .sidebar a {
-    display: block;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    padding: 5px;
-    text-align: center;
-  } */
- 
-
   .sidebar img {
     width: 20px;
     height: 20px;
+  }
+  
+  .below h1 {
+    padding-top: 10px;
   }
