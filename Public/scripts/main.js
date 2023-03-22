@@ -147,6 +147,53 @@ addTaskBtn.addEventListener('click', () => {
   }
 });
 
+// Add event listener for input field
+taskInput.addEventListener('keydown', (event) => {
+  if (event.keyCode === 13) { // Check if "Enter" key was pressed
+    if (todoList.children.length > 0) {
+      if (placeHolder) {
+        placeHolder.remove();
+      }
+    }
+    // Get the task from the input field
+    const task = taskInput.value.trim();
+    if (task && todoList.childElementCount < maxTasks) {
+      // Create a new todo item element
+      const todoItem = document.createElement('li');
+      const todoText = document.createElement('span');
+      todoText.innerText = task;
+      const todoCheckbox = document.createElement('input');
+      todoCheckbox.type = 'checkbox';
+      const removeBtn = document.createElement('button');
+      removeBtn.classList.add('remove-btn');
+
+      removeBtn.addEventListener('click', () => {
+        todoList.removeChild(todoItem);
+        if (todoList.childElementCount < maxTasks) {
+          todoList.classList.remove('shake');
+        } else if (todoList.childElementCount === maxTasks) {
+          todoList.classList.add('shake');
+        }
+      });
+
+      // Add the todo item elements to the list
+      todoItem.appendChild(todoCheckbox);
+      todoItem.appendChild(todoText);
+      todoItem.appendChild(removeBtn);
+      todoList.appendChild(todoItem);
+
+      // Clear the task input field and hide the modal
+      taskInput.value = '';
+      modal.style.display = 'none';
+
+      // Add shake animation if maximum number of tasks is reached
+      if (todoList.childElementCount >= maxTasks) {
+        todoList.classList.add('shake');
+      }
+    }
+  }
+});
+
 // Add event listener for close button
 closeBtn.addEventListener('click', () => {
   // Hide the modal

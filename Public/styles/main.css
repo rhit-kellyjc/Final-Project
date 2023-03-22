@@ -190,7 +190,6 @@ iframe {
 /* Close button */
 .add-task-btn {
     float: right;
-    width: 15%;
     justify-content: center;
     margin-top: 10px;
     padding-top: 200px;
@@ -200,7 +199,6 @@ iframe {
 /* Close button */
 .close-modal-btn {
     float: right;
-    width: 120px;
     justify-content: center;
 }
 
