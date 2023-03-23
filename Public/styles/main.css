@@ -72,12 +72,16 @@ button:active {
     box-shadow: none;
 }
 
-.button-container {
+.button-container, .mod-button-container {
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #00073db7;
     padding: 20px;
+}
+
+.mod-button-container {
+    background-color: white;
 }
 
 .btn-circle {
@@ -150,7 +154,7 @@ iframe {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    height: 100%;
+    height: 600px;
     background-size: contain;
 }
 
@@ -418,3 +422,4 @@ h2 {
 img {
     width: 100%;
 }
+
