@@ -216,9 +216,50 @@ todoList.addEventListener('click', (event) => {
   }
 });
 
+function toggleDropdown() {
+  var dropdown = document.getElementById("myDropdown");
+  if (dropdown.style.display === "block") {
+    dropdown.style.display = "none";
+  } else {
+    dropdown.style.display = "block";
+  }
 
+  var dropdownLinks = document.querySelectorAll(".dropdown-content a");
+  for (var i = 0; i < dropdownLinks.length; i++) {
+    dropdownLinks[i].addEventListener("click", function (event) {
+      event.preventDefault();
+      dropdown.style.display = "none";
+      // Change background color on Option 1 click
+      if (this.innerHTML === "Waterfall") {
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundImage = "url('https://cdn.wallpapersafari.com/97/35/msafi4.jpg')";
 
+      }
+      if (this.innerHTML === "City") {
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundImage = "url('https://images5.alphacoders.com/456/456536.jpg')";
+      }
+      if (this.innerHTML === "Beach") {
+        document.body.style.backgroundSize = "cover";
 
+        document.body.style.backgroundImage = "url('https://www.pixelstalk.net/wp-content/uploads/images5/4K-Beach-HD-Wallpaper-Free-download.jpg')";
+      }
+    });
+  }
+}
+
+// Close dropdown menu when clicked outside
+window.onclick = function (event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    for (var i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.style.display === 'block') {
+        openDropdown.style.display = 'none';
+      }
+    }
+  }
+}
 // Add event listeners to the buttons
 const playButton = document.querySelector('.play-btn');
 const pauseButton = document.querySelector('.pause-btn');

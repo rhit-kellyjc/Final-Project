@@ -47,19 +47,27 @@
 
     <div class="sidebar">
         <a href="https://twitter.com/jkelly_1214" target="_blank">
-          <img src="twitter.png" alt="Twitter">
+            <img src="twitter.png" alt="Twitter">
         </a>
         <a href="https://github.com/jack-kelly12" target="_blank">
-          <img src="github-sign.png" alt="Github">
+            <img src="github-sign.png" alt="Github">
         </a>
-      </div>
-      
-      
+    </div>
+
+
 
     <div class="button-container">
         <button class="long-break">Long Break</button>
         <button class="short-break">Short Break</button>
         <button class="add-todo">Add To-Do</button>
+        <div class="dropdown">
+            <button onclick="toggleDropdown()" class="dropbtn">Theme</button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="#">Waterfall</a>
+                <a href="#">City</a>
+                <a href="#">Beach</a>
+            </div>
+        </div>
     </div>
 
     <!-- Modal dialog box -->
@@ -96,5 +104,6 @@
     </div>
 
     <script src="scripts/main.js"></script>
+
 
 </html>

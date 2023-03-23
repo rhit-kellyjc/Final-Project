@@ -151,6 +151,7 @@ iframe {
     justify-content: space-between;
     align-items: center;
     height: 100%;
+    background-size: contain;
 }
 
 
@@ -278,7 +279,7 @@ iframe {
 
 .todo-container {
     margin-right: 5%;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 10px;
     /* padding: 20px; */
     padding-top: 10px;
@@ -317,12 +318,13 @@ h2 {
     border-bottom: 5px;
 }
 
-#task-input {
+#task-input ::before {
     padding: 10px;
     border-radius: 5px;
     border: none;
     width: 60%;
     margin-right: 10px;
+    border: 5px black;
 }
 
 #add-task-btn {
@@ -365,13 +367,54 @@ h2 {
     border: 1px solid #ccc;
     padding: 5px;
     justify-items: center;
-  }
+}
 
-  .sidebar img {
+.sidebar img {
     width: 20px;
     height: 20px;
-  }
-  
-  .below h1 {
+}
+
+.below h1 {
     padding-top: 10px;
-  }
+}
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown button */
+.dropbtn {
+    background-color: white;
+    color: #00073db7;
+    border: none;
+    cursor: pointer;
+}
+
+/* Dropdown content */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* Dropdown links */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Show the dropdown menu */
+.show {
+    display: block;
+}
+
+img {
+    width: 100%;
+}
