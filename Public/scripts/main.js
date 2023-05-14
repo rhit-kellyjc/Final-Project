@@ -1,277 +1,298 @@
-// Get the timer elements
-const minutesElement = document.querySelector('.minutes');
-const secondsElement = document.querySelector('.seconds');
+var rhit = rhit || {};
 
-// Set the initial time
-let time = 25 * 60; // 25 minutes in seconds
+rhit.mainPageController = class {
+  constructor() {
+    this.minutesElement = document.querySelector('.minutes');
+    this.secondsElement = document.querySelector('.seconds');
+    this.time = 25 * 60;
+    this.intervalId = null;
+    this.playButton = document.querySelector('#playButton');
+    this.pauseButton = document.querySelector('#pauseButton');
+    this.resetButton = document.querySelector('#resetButton');
+    this.longBreakButton = document.querySelector('.long-break');
+    this.shortBreakButton = document.querySelector('.short-break');
+    this.pomodoroButton = document.querySelector('.pomodoro-button');
+    this.themeSelect = document.querySelector('#themeSelect');
+    this.saveSettingsButton = document.querySelector("#saveSettingsButton");
+    this.todoList = document.querySelector('#todoList');
+    this.saveTodoButton = document.querySelector('#saveTodoButton');
 
-// Create an interval ID variable
-let intervalId;
-const audio = new Audio('Downloads/timer-done.mp3');
 
-// Get the progress bar element
-const progressBar = document.querySelector('.progress-bar');
+    this.pomodoroDuration = 25 * 60;
+    this.longBreakDuration = 15 * 60;
+    this.shortBreakDuration = 5 * 60;
+
+    this.pomodoroButton.addEventListener('click', this.setToPomodoro.bind(this));
+    this.playButton.addEventListener('click', this.startTimer.bind(this));
+    this.pauseButton.addEventListener('click', this.pauseTimer.bind(this));
+    this.resetButton.addEventListener('click', this.setToPomodoro.bind(this));
+    this.longBreakButton.addEventListener('click', this.setLongBreak.bind(this));
+    this.shortBreakButton.addEventListener('click', this.setShortBreak.bind(this));
+    this.themeSelect.addEventListener('change', this.changeTheme.bind(this));
+    this.saveTodoButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      const todoText = document.getElementById('todoText').value;
+      const cycles = document.getElementById('cycleCount').value;
+
+      if (todoText) {
+        this.addTodoItem(todoText, cycles);
+        $('#todoModal').modal('hide');
+      }
+
+      document.getElementById('todoText').value = '';
+    });
+    this.saveSettingsButton.addEventListener('click', () => {
+      const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
+      const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
+      const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
 
 
-// update progress bar width
-function updateProgressBar(timeLeft) {
-  const totalTime = 25 * 60; // 25 minutes in seconds
-  const percentComplete = (totalTime - timeLeft) / totalTime * 100;
-  progressBar.style.width = `${percentComplete}%`;
-}
+      if (pomodoroDuration >= 0 && longBreakDuration >= 0 && shortBreakDuration >= 0) {
+        this.setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration);
+        $('#settingsModal').modal('hide');
+      } else {
+        alert("Invalid durations. Durations must be positive.");
+      }
 
-function updateTimer() {
-  // Calculate the remaining minutes and seconds
-  const minutes = Math.floor(time / 60);
-  const seconds = time % 60;
 
-  // Update the timer elements
-  minutesElement.textContent = minutes.toString().padStart(2, '0');
-  secondsElement.textContent = seconds.toString().padStart(2, '0');
+      $('#settingsModal').modal('hide');
+    });
 
-  // Update the progress bar
-  const totalTime = time === 0 ? 1 : 25 * 60; // set a minimum value for totalTime to prevent division by zero
-  const progress = ((totalTime - time) / totalTime) * 100;
-  progressBar.style.width = `${progress}%`;
+  }
 
-  // Decrement the time
-  time--;
+  setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration) {
+    this.pomodoroDuration = pomodoroDuration * 60;
+    this.longBreakDuration = longBreakDuration * 60;
+    this.shortBreakDuration = shortBreakDuration * 60;
+  }
 
-  // Stop the timer when the time reaches zero
-  if (time < 0) {
-    clearInterval(intervalId);
-
-    // Play the sound
+  playSound(soundFilePath) {
+    const audio = new Audio(soundFilePath);
     audio.play();
-
-    // Do something when the timer reaches zero
-  }
-}
-
-
-// Start the timer
-function startTimer() {
-  // Only start a new interval if the timer isn't already running
-  if (!intervalId) {
-    intervalId = setInterval(updateTimer, 1000);
-    updateTimer(); // Call updateTimer() immediately after setting up the interval
   }
 
-}
-
-// Pause the timer
-function pauseTimer() {
-  clearInterval(intervalId);
-  intervalId = null;
-}
-
-// Reset the timer to its initial value
-function resetTimer() {
-  clearInterval(intervalId);
-  intervalId = null;
-  updateTimer();
-}
-
-function setToPomodoro() {
-  time = 25 * 60;
-  resetTimer();
-}
-
-// Set the time to 15 minutes for the long break
-function setLongBreak() {
-  time = 15 * 60;
-  resetTimer();
-}
-
-// Set the time to 5 minutes for the short break
-function setShortBreak() {
-  time = 5 * 60;
-  resetTimer();
-}
-
-// Get the add todo button and modal elements
-const addTodoBtn = document.querySelector('.add-todo');
-const modal = document.querySelector('.modal');
-const taskInput = document.querySelector('#task-input');
-const addTaskBtn = document.querySelector('#add-task-btn');
-const closeBtn = document.querySelector('.close-modal-btn');
-
-// Get the todo list element
-const todoList = document.querySelector('#todo-list');
-
-// Set the maximum number of tasks
-const maxTasks = 10;
-const placeHolder = document.querySelector(".todo-item-place-holder");
-// Add event listener for add task button
-addTaskBtn.addEventListener('click', () => {
-  if (todoList.children.length > 0) {
-    if (placeHolder) {
-      placeHolder.remove();
-    }
-  }
-  // Get the task from the input field
-  const task = taskInput.value.trim();
-  if (task && todoList.childElementCount < maxTasks) {
-    // Create a new todo item element
+  constructTodoItem(text, cycles) {
     const todoItem = document.createElement('li');
-    const todoText = document.createElement('span');
-    todoText.innerText = task;
-    const todoCheckbox = document.createElement('input');
-    todoCheckbox.type = 'checkbox';
-    const removeBtn = document.createElement('button');
-    removeBtn.classList.add('remove-btn');
+    todoItem.classList.add('todo-item');
 
-    removeBtn.addEventListener('click', () => {
-      todoList.removeChild(todoItem);
-      if (todoList.childElementCount < maxTasks) {
-        todoList.classList.remove('shake');
-      } else if (todoList.childElementCount === maxTasks) {
-        todoList.classList.add('shake');
+    const todoText = document.createElement('div');
+    todoText.textContent = `${text} (${cycles} cycles)`;
+    todoItem.appendChild(todoText);
+
+    const deleteCheckbox = document.createElement('input');
+    deleteCheckbox.type = 'checkbox';
+    deleteCheckbox.classList.add('delete-checkbox');
+    todoItem.appendChild(deleteCheckbox);
+
+    deleteCheckbox.addEventListener('change', () => {
+      if (deleteCheckbox.checked) {
+        todoItem.remove();
       }
     });
 
-    // Add the todo item elements to the list
-    todoItem.appendChild(todoCheckbox);
-    todoItem.appendChild(todoText);
-    todoItem.appendChild(removeBtn);
-    todoList.appendChild(todoItem);
+    const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
+    editButton.addEventListener('click', () => {
+      const editTodoText = document.getElementById('editTodoText');
+      const editCycleCount = document.getElementById('editCycleCount');
+      editTodoText.value = text;
+      editCycleCount.value = cycles;
 
-    // Clear the task input field and hide the modal
-    taskInput.value = '';
-    modal.style.display = 'none';
 
-    // Add shake animation if maximum number of tasks is reached
-    if (todoList.childElementCount >= maxTasks) {
-      todoList.classList.add('shake');
-    }
-  }
-});
-
-// Add event listener for input field
-taskInput.addEventListener('keydown', (event) => {
-  if (event.keyCode === 13) { // Check if "Enter" key was pressed
-    if (todoList.children.length > 0) {
-      if (placeHolder) {
-        placeHolder.remove();
-      }
-    }
-    // Get the task from the input field
-    const task = taskInput.value.trim();
-    if (task && todoList.childElementCount < maxTasks) {
-      // Create a new todo item element
-      const todoItem = document.createElement('li');
-      const todoText = document.createElement('span');
-      todoText.innerText = task;
-      const todoCheckbox = document.createElement('input');
-      todoCheckbox.type = 'checkbox';
-      const removeBtn = document.createElement('button');
-      removeBtn.classList.add('remove-btn');
-
-      removeBtn.addEventListener('click', () => {
-        todoList.removeChild(todoItem);
-        if (todoList.childElementCount < maxTasks) {
-          todoList.classList.remove('shake');
-        } else if (todoList.childElementCount === maxTasks) {
-          todoList.classList.add('shake');
-        }
+      const saveEditButton = document.getElementById('saveEditButton');
+      saveEditButton.addEventListener('click', () => {
+        text = editTodoText.value;
+        cycles = editCycleCount.value;
+        todoText.textContent = `${text} (${cycles} cycles)`;
+        $('#editModal').modal('hide');
       });
 
-      // Add the todo item elements to the list
-      todoItem.appendChild(todoCheckbox);
-      todoItem.appendChild(todoText);
-      todoItem.appendChild(removeBtn);
-      todoList.appendChild(todoItem);
+      $('#editModal').modal('show');
+    });
 
-      // Clear the task input field and hide the modal
-      taskInput.value = '';
-      modal.style.display = 'none';
+    todoItem.appendChild(editButton);
 
-      // Add shake animation if maximum number of tasks is reached
-      if (todoList.childElementCount >= maxTasks) {
-        todoList.classList.add('shake');
-      }
-    }
-  }
-});
-
-// Add event listener for close button
-closeBtn.addEventListener('click', () => {
-  // Hide the modal
-  modal.style.display = 'none';
-});
-
-// Add event listener for todo list
-todoList.addEventListener('click', (event) => {
-  const element = event.target;
-  if (element.type === 'checkbox') {
-    const todoItem = element.parentNode;
-    if (element.checked) {
-      todoItem.classList.add('checked');
-    } else {
-      todoItem.classList.remove('checked');
-    }
-  } else if (element.classList.contains('remove-btn')) {
-    const todoItem = element.parentNode;
-    todoList.removeChild(todoItem);
-  }
-});
-
-function toggleDropdown() {
-  var dropdown = document.getElementById("myDropdown");
-  if (dropdown.style.display === "block") {
-    dropdown.style.display = "none";
-  } else {
-    dropdown.style.display = "block";
+    return todoItem;
   }
 
-  var dropdownLinks = document.querySelectorAll(".dropdown-content a");
-  for (var i = 0; i < dropdownLinks.length; i++) {
-    dropdownLinks[i].addEventListener("click", function (event) {
-      event.preventDefault();
-      dropdown.style.display = "none";
-      // Change background color on Option 1 click
-      if (this.innerHTML === "Waterfall") {
+
+  addTodoItem(text, cycles) {
+    const todoItem = this.constructTodoItem(text, cycles);
+    this.todoList.appendChild(todoItem);
+  }
+
+
+
+  changeTheme() {
+    const selectedTheme = themeSelect.value;
+    const mainPage = document.getElementById('mainPage');
+
+    switch (selectedTheme) {
+      case 'waterfall':
         document.body.style.backgroundSize = "cover";
         document.body.style.backgroundImage = "url('https://cdn.wallpapersafari.com/97/35/msafi4.jpg')";
-
-      }
-      if (this.innerHTML === "City") {
+        break;
+      case 'beach':
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundImage = "url('https://www.pixelstalk.net/wp-content/uploads/images5/4K-Beach-HD-Wallpaper-Free-download.jpg')";
+        break;
+      case 'city':
         document.body.style.backgroundSize = "cover";
         document.body.style.backgroundImage = "url('https://images5.alphacoders.com/456/456536.jpg')";
-      }
-      if (this.innerHTML === "Beach") {
+        break;
+
+      case 'White Sox':
         document.body.style.backgroundSize = "cover";
-
-        document.body.style.backgroundImage = "url('https://www.pixelstalk.net/wp-content/uploads/images5/4K-Beach-HD-Wallpaper-Free-download.jpg')";
-      }
-    });
-  }
-}
-
-// Close dropdown menu when clicked outside
-window.onclick = function (event) {
-  if (!event.target.matches('.dropbtn')) {
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    for (var i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.style.display === 'block') {
-        openDropdown.style.display = 'none';
-      }
+        document.body.style.backgroundImage = "url('images/whiteSoxPark.jpg')";
+        break;
     }
   }
-}
-// Add event listeners to the buttons
-const playButton = document.querySelector('.play-btn');
-const pauseButton = document.querySelector('.pause-btn');
-const resetButton = document.querySelector('.reset-btn');
-const longBreakButton = document.querySelector('.long-break');
-const shortBreakButton = document.querySelector('.short-break');
 
-playButton.addEventListener('click', startTimer);
-pauseButton.addEventListener('click', pauseTimer);
-resetButton.addEventListener('click', setToPomodoro);
-longBreakButton.addEventListener('click', setLongBreak);
-shortBreakButton.addEventListener('click', setShortBreak);
-addTodoBtn.addEventListener('click', () => {
-  modal.style.display = 'block';
-});
+
+  updateTimer() {
+    const minutes = Math.floor(this.time / 60);
+    const seconds = this.time % 60;
+
+    this.minutesElement.textContent = minutes.toString().padStart(2, '0');
+    this.secondsElement.textContent = seconds.toString().padStart(2, '0');
+
+    this.time--;
+
+    console.log(minutes);
+    console.log(seconds);
+    if (this.time < 0) {
+      clearInterval(this.intervalId);
+      this.playSound('soundEffects/bellRinging.mp3');
+    }
+
+    if (minutes === 5 && seconds === 1) {
+      this.playSound('soundEffects/fiveMins.mp3');
+    }
+    
+  }
+
+  startTimer() {
+    if (!this.intervalId) {
+      this.intervalId = setInterval(this.updateTimer.bind(this), 1000);
+      this.updateTimer();
+    }
+  }
+
+  pauseTimer() {
+    clearInterval(this.intervalId);
+    this.intervalId = null;
+  }
+
+  resetTimer() {
+    clearInterval(this.intervalId);
+    this.intervalId = null;
+    this.updateTimer();
+  }
+
+  setToPomodoro() {
+    this.time = this.pomodoroDuration;
+    this.resetTimer();
+  }
+
+  setLongBreak() {
+    this.time = this.longBreakDuration;
+    this.resetTimer();
+  }
+
+  setShortBreak() {
+    this.time = this.shortBreakDuration;
+    this.resetTimer();
+  }
+
+};
+
+rhit.main = function () {
+  const inputEmailEl = document.querySelector("#inputEmail");
+  const inputPasswordEl = document.querySelector("#inputPassword");
+
+  const signOutButton = document.querySelector("#signOutButton");
+  if (signOutButton) {
+    signOutButton.onclick = (event) => {
+      console.log(`Sign out`);
+      firebase.auth().signOut().then(function () {
+        console.log("You are now signed out");
+      }).catch(function (error) {
+        console.log("Sign out error");
+      });
+    };
+  }
+
+  const createAccountButton = document.querySelector("#createAccountButton");
+  if (createAccountButton) {
+    createAccountButton.onclick = (event) => {
+      console.log(`Create account for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
+      firebase.auth().createUserWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log("Create account error", errorCode, errorMessage);
+      });
+    };
+  }
+
+  const logInButton = document.querySelector("#logInButton");
+  if (logInButton) {
+    logInButton.onclick = (event) => {
+      console.log(`Log in for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
+      firebase.auth().signInWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log("Existing account log in error", errorCode, errorMessage);
+      });
+    };
+  }
+
+  const anonymousAuthButton = document.querySelector("#anonymousAuthButton");
+  if (anonymousAuthButton) {
+    anonymousAuthButton.onclick = (event) => {
+      firebase.auth().signInAnonymously().catch(function (error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log("Anonymous auth error", errorCode, errorMessage);
+      });
+    };
+  }
+
+  rhit.startFirebaseUI();
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      const displayName = user.displayName;
+      const email = user.email;
+      const photoURL = user.photoURL;
+      const isAnonymous = user.isAnonymous;
+      const uid = user.uid;
+
+      console.log("The user is signed in ", uid);
+      console.log('displayName :>> ', displayName);
+      console.log('email :>> ', email);
+      console.log('photoURL :>> ', photoURL);
+      console.log('isAnonymous :>> ', isAnonymous);
+      console.log('uid :>> ', uid);
+
+      if (document.querySelector("#mainPage")) {
+        rhit.mainPageController = new rhit.mainPageController();
+      }
+    } else {
+      console.log("There is no user signed in!");
+    }
+  });
+};
+
+rhit.startFirebaseUI = function () {
+  var uiConfig = {
+    signInSuccessUrl: '/mainPage.html',
+    signInOptions: [
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+    ],
+  };
+  const ui = new firebaseui.auth.AuthUI(firebase.auth());
+  ui.start('#firebaseui-auth-container', uiConfig);
+};
+
+rhit.main();

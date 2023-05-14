@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+    <link rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
+    <link rel="stylesheet" href="styles/main.css">
+    <title>Pomodoro Timer</title>
+</head>
+
+<body>
+    <!-- Modal dialog box -->
+    <div id="mainPage">
+        <div class="pomodoro-header">Pomodoro Timer</div>
+        <div class="modal" id="spotifyModal" tabindex="-1" role="dialog" aria-labelledby="spotifyModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="spotifyModalLabel">Spotify Playlist</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <iframe style="border-radius:12px"
+                            src="https://open.spotify.com/embed/playlist/3vXUEGi4ip1EhI9OtdgdCy?utm_source=generator&theme=0"
+                            width="100%" height="352" frameBorder="0" allowfullscreen=""
+                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                            loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="todoModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="todoModalLabel">Add To-do</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="todoText">What to do?</label>
+                                <input type="text" class="form-control" id="todoText">
+                            </div>
+                            <div class="form-group">
+                                <label for="cycleCount">Cycle Count:</label>
+                                <input type="number" id="cycleCount" class="form-control">
+                              </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveTodoButton">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editModalLabel">Edit Todo</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="editTodoText">Todo:</label>
+                    <input type="text" id="editTodoText" class="form-control" placeholder="Edit your todo">
+                  </div>
+                  <div class="form-group">
+                    <label for="editCycleCount">Cycle Count:</label>
+                    <input type="number" id="editCycleCount" class="form-control" placeholder="Edit the cycle count">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button id="saveEditButton" type="button" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+
+        <div class="modal" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="todoModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="theme">Theme</label>
+                                <select class="form-control" id="themeSelect">
+                                    <option value="" disabled selected hidden>Choose theme</option>
+                                    <option value="beach">Bahamas Beach</option>
+                                    <option value="city">City at Night</option>
+                                    <option value="waterfall">Calming Waterfall</option>
+                                    <option value="White Sox">White Sox Summer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pomodoroDuration">Pomodoro Duration (minutes):</label>
+                                <input type="number" class="form-control" id="pomodoroDuration" value="25">
+                              </div>
+                              <div class="form-group">
+                                <label for="longBreakDuration">Long Break Duration (minutes):</label>
+                                <input type="number" class="form-control" id="longBreakDuration" value="15">
+                              </div>
+                              <div class="form-group">
+                                <label for="shortBreakDuration">Short Break Duration (minutes):</label>
+                                <input type="number" class="form-control" id="shortBreakDuration" value="5">
+                              </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveSettingsButton">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Timer wrapper -->
+        <div class="timer-wrapper">
+            <!-- Timer container -->
+            <div class="timer-container">
+                <!-- Timer -->
+                <div class="timer">
+                    <div class="minutes">25</div>
+                    <div class="colon">:</div>
+                    <div class="seconds">00</div>
+                </div> <!-- End Timer -->
+                <!-- Timer controls -->
+                <div class="timer-controls">
+                    <button id="playButton" class="btn btn-circle play-btn"><i
+                            class="material-icons">play_arrow</i></button>
+                    <button id="pauseButton" class="btn btn-circle pause-btn"><i
+                            class="material-icons">pause</i></button>
+                    <button id="resetButton" class="btn btn-circle reset-btn"><i
+                            class="material-icons">refresh</i></button>
+                    <button id="spotifyButton" class="btn btn-circle spotify" data-toggle="modal"
+                        data-target="#spotifyModal">
+                        <i class="material-icons">music_note</i>
+                    </button>
+                    <button id="settingsButton" class="btn btn-circle settings" data-toggle="modal"
+                        data-target="#settingsModal"><i class="material-icons">settings</i>
+                    </button>
+                </div>
+                <!-- End Timer controls -->
+            </div>
+            <!-- End Timer container -->
+            <!-- Todo container -->
+            <div class="todo-container">
+                <h2>To-do List</h2>
+                <button id="addButton" class="btn btn-circle add-button" data-toggle="modal" data-target="#todoModal">
+                    <i class="material-icons">add</i>
+                </button>
+                <ol id="todoList">
+
+                </ol>
+            </div>
+            <!-- End Todo container -->
+        </div>
+        <!-- End timer wrapper -->
+
+        <div class="sidebar">
+            <a href="https://twitter.com/jkelly_1214" target="_blank">
+                <img src="images/twitter.png" alt="Twitter">
+            </a>
+            <a href="https://github.com/jack-kelly-12" target="_blank">
+                <img src="images/github-sign.png" alt="Github">
+            </a>
+        </div>
+
+        <div class="button-container">
+            <button class="long-break">Long Break</button>
+            <button class="short-break">Short Break</button>
+            <button class="pomodoro-button">Pomodoro</button>
+        </div>
+
+
+
+
+    </div>
+</body>
+
+<script src="scripts/jquery.min.js"></script>
+<script src="scripts/popper.js"></script>
+<script src="scripts/bootstrap-material-design.js"></script>
+<script>
+    $("body").bootstrapMaterialDesign();
+</script>
+<script src="/__/firebase/7.18.0/firebase-app.js"></script>
+<script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+<script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+<script src="/__/firebase/init.js"></script>
+<script src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
+<script src="scripts/main.js"></script>
+
+</html>
