@@ -2,7 +2,15 @@ var rhit = rhit || {};
 
 rhit.mainPageController = class {
   constructor() {
-    this.todosCollection = this.firestore.collection('Todos');
+// Connect to Firestore using a callback
+  this.connectToFirestore(() => {
+    this.todosCollection = firebase.firestore().collection('Todos');
+  });
+
+
+
+
+    //use a callback to connect to firestore
     this.minutesElement = document.querySelector('.minutes');
     this.secondsElement = document.querySelector('.seconds');
     this.time = 25 * 60;
@@ -60,6 +68,17 @@ rhit.mainPageController = class {
     });
 
   }
+
+  connectToFirestore(callback) {
+    firebase.firestore().enablePersistence()
+      .then(() => {
+        callback();
+      })
+      .catch((error) => {
+        console.error('Error enabling Firestore persistence: ', error);
+        callback();
+      });
+    }
 
   addTodoItem(text, cycles) {
     const todoItem = this.constructTodoItem(text, cycles);
@@ -273,6 +292,7 @@ rhit.main = function () {
 
   const logInButton = document.querySelector("#logInButton");
   if (logInButton) {
+    rhit.startFirebaseUI(); //may want to move to login page controller
     logInButton.onclick = (event) => {
       console.log(`Log in for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
       firebase.auth().signInWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
@@ -294,7 +314,6 @@ rhit.main = function () {
     };
   }
 
-  rhit.startFirebaseUI();
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       const displayName = user.displayName;
