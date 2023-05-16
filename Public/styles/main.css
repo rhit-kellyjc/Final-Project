@@ -181,21 +181,6 @@ button:active {
     color: #333;
 }
 
-#todo-list {
-    list-style-type: decimal;
-    margin: 0;
-    padding-left: 15px;
-}
-
-.todo-item {
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 5px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.31);
-    display: flex;
-    align-items: center;
-}
 
 .todo-item .todo-text {
     flex-grow: 1;
@@ -281,7 +266,7 @@ h2 {
 .container {
     display: flex;
     margin: 3rem 0rem 3rem 3rem;
-    color:rgb(21, 21, 60);
+    color: rgb(21, 21, 60);
     justify-content: center;
 }
 
@@ -312,4 +297,23 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.todo-item .edit-button, .done-text {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: #888;
+    cursor: pointer;
+    margin-left: 5px;
+    padding: 5px;
+}
+
+.todo-item .edit-button i {
+    font-size: 8px;
+    margin-right: 5px;
+}
+
+.todo-item {
+    margin-bottom: 10px;
 }

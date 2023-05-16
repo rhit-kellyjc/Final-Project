@@ -2,6 +2,12 @@ var rhit = rhit || {};
 
 rhit.mainPageController = class {
   constructor() {
+// Connect to Firestore using a callback
+  this.connectToFirestore(() => {
+    this.todosCollection = firebase.firestore().collection('Todos');
+  });
+
+    //use a callback to connect to firestore
     this.minutesElement = document.querySelector('.minutes');
     this.secondsElement = document.querySelector('.seconds');
     this.time = 25 * 60;
@@ -41,6 +47,7 @@ rhit.mainPageController = class {
 
       document.getElementById('todoText').value = '';
     });
+    
     this.saveSettingsButton.addEventListener('click', () => {
       const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
       const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
@@ -60,6 +67,38 @@ rhit.mainPageController = class {
 
   }
 
+  connectToFirestore(callback) {
+    firebase.firestore().enablePersistence()
+      .then(() => {
+        callback();
+      })
+      .catch((error) => {
+        console.error('Error enabling Firestore persistence: ', error);
+        callback();
+      });
+    }
+
+  addTodoItem(text, cycles) {
+    const todoItem = this.constructTodoItem(text, cycles);
+
+    // Save the todo to Firestore
+    this.todosCollection.add({
+      text: text,
+      cycles: cycles,
+      lastTouched: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then((docRef) => {
+      // Assign a unique ID to the todo item
+      todoItem.dataset.todoId = docRef.id;
+
+      // Append the todo item to the list
+      this.todoList.appendChild(todoItem);
+    })
+    .catch((error) => {
+      console.error('Error adding todo: ', error);
+    });
+  }
+
   setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration) {
     this.pomodoroDuration = pomodoroDuration * 60;
     this.longBreakDuration = longBreakDuration * 60;
@@ -74,54 +113,34 @@ rhit.mainPageController = class {
   constructTodoItem(text, cycles) {
     const todoItem = document.createElement('li');
     todoItem.classList.add('todo-item');
-
+  
     const todoText = document.createElement('div');
     todoText.textContent = `${text} (${cycles} cycles)`;
     todoItem.appendChild(todoText);
-
-    const deleteCheckbox = document.createElement('input');
-    deleteCheckbox.type = 'checkbox';
-    deleteCheckbox.classList.add('delete-checkbox');
-    todoItem.appendChild(deleteCheckbox);
-
-    deleteCheckbox.addEventListener('change', () => {
-      if (deleteCheckbox.checked) {
-        todoItem.remove();
+  
+    const doneText = document.createElement('button');
+    doneText.textContent = 'Done?';
+    doneText.classList.add('done-text');
+    todoItem.appendChild(doneText);
+  
+    doneText.addEventListener('click', () => {
+      todoItem.remove();
+    });
+  
+    const editButton = document.createElement('button');
+    editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>Edit';
+    editButton.classList.add('edit-button');
+    todoItem.appendChild(editButton);
+  
+    editButton.addEventListener('click', () => {
+      const newText = prompt('Enter new text:');
+      if (newText) {
+        todoText.textContent = newText;
       }
     });
-
-    const editButton = document.createElement('button');
-    editButton.textContent = 'Edit';
-    editButton.addEventListener('click', () => {
-      const editTodoText = document.getElementById('editTodoText');
-      const editCycleCount = document.getElementById('editCycleCount');
-      editTodoText.value = text;
-      editCycleCount.value = cycles;
-
-
-      const saveEditButton = document.getElementById('saveEditButton');
-      saveEditButton.addEventListener('click', () => {
-        text = editTodoText.value;
-        cycles = editCycleCount.value;
-        todoText.textContent = `${text} (${cycles} cycles)`;
-        $('#editModal').modal('hide');
-      });
-
-      $('#editModal').modal('show');
-    });
-
-    todoItem.appendChild(editButton);
-
+  
     return todoItem;
   }
-
-
-  addTodoItem(text, cycles) {
-    const todoItem = this.constructTodoItem(text, cycles);
-    this.todoList.appendChild(todoItem);
-  }
-
-
 
   changeTheme() {
     const selectedTheme = themeSelect.value;
@@ -158,17 +177,27 @@ rhit.mainPageController = class {
 
     this.time--;
 
-    console.log(minutes);
-    console.log(seconds);
     if (this.time < 0) {
       clearInterval(this.intervalId);
       this.playSound('soundEffects/bellRinging.mp3');
+
+      // Get the todo item ID
+      const todoId = this.todoList.firstElementChild.dataset.todoId;
+
+      // Update the lastTouched field in Firestore
+      this.todosCollection.doc(todoId).update({
+        lastTouched: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .catch((error) => {
+        console.error('Error updating todo: ', error);
+      });
     }
+
 
     if (minutes === 5 && seconds === 1) {
       this.playSound('soundEffects/fiveMins.mp3');
     }
-    
+
   }
 
   startTimer() {
@@ -236,6 +265,7 @@ rhit.main = function () {
 
   const logInButton = document.querySelector("#logInButton");
   if (logInButton) {
+    rhit.startFirebaseUI(); //may want to move to login page controller
     logInButton.onclick = (event) => {
       console.log(`Log in for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
       firebase.auth().signInWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
@@ -257,7 +287,6 @@ rhit.main = function () {
     };
   }
 
-  rhit.startFirebaseUI();
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       const displayName = user.displayName;
@@ -272,12 +301,13 @@ rhit.main = function () {
       console.log('photoURL :>> ', photoURL);
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
-
-      if (document.querySelector("#mainPage")) {
-        rhit.mainPageController = new rhit.mainPageController();
-      }
     } else {
       console.log("There is no user signed in!");
+    }
+
+    if (document.querySelector("#mainPage")) {
+      rhit.mainPageController = new rhit.mainPageController();
+      window.location.href = 'mainPage.html';
     }
   });
 };
