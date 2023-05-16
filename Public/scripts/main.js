@@ -236,7 +236,6 @@ rhit.mainPageController = class {
 rhit.main = function () {
   const inputEmailEl = document.querySelector("#inputEmail");
   const inputPasswordEl = document.querySelector("#inputPassword");
-
   const signOutButton = document.querySelector("#signOutButton");
   if (signOutButton) {
     signOutButton.addEventListener('click', (event) => {
@@ -306,12 +305,7 @@ rhit.main = function () {
   
       if (document.querySelector("#mainPage") && !rhit.mainPageControllerInstance) {
         rhit.mainPageControllerInstance = new rhit.mainPageController();
-        if (window.location.href.indexOf('mainPage.html') === -1) {
-          window.location.href = 'mainPage.html';
-        }
-      }
-      
-      
+      } 
     } else {
       console.log("There is no user signed in!");
     }
@@ -327,6 +321,11 @@ rhit.startFirebaseUI = function () {
       firebase.auth.EmailAuthProvider.PROVIDER_ID,
       firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
     ],
+    callbacks: {
+      signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+        return false; // Prevent automatic redirection after sign-in
+      }
+    }
   };
   const ui = new firebaseui.auth.AuthUI(firebase.auth());
   ui.start('#firebaseui-auth-container', uiConfig);
