@@ -1,7 +1,5 @@
 var rhit = rhit || {};
 
-rhit.mainPageControllerInstance = null;
-
 rhit.mainPageController = class {
   constructor() {
 // Connect to Firestore using a callback
@@ -50,11 +48,11 @@ rhit.mainPageController = class {
       document.getElementById('todoText').value = '';
     });
     
-    this.saveSettingsButton.addEventListener('click', (event) => {
-      event.preventDefault();
+    this.saveSettingsButton.addEventListener('click', () => {
       const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
       const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
       const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
+
 
       if (pomodoroDuration >= 0 && longBreakDuration >= 0 && shortBreakDuration >= 0) {
         this.setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration);
@@ -62,7 +60,11 @@ rhit.mainPageController = class {
       } else {
         alert("Invalid durations. Durations must be positive.");
       }
+
+
+      $('#settingsModal').modal('hide');
     });
+
   }
 
   connectToFirestore(callback) {
@@ -236,56 +238,53 @@ rhit.mainPageController = class {
 rhit.main = function () {
   const inputEmailEl = document.querySelector("#inputEmail");
   const inputPasswordEl = document.querySelector("#inputPassword");
+
   const signOutButton = document.querySelector("#signOutButton");
   if (signOutButton) {
-    signOutButton.addEventListener('click', (event) => {
-      event.preventDefault();
+    signOutButton.onclick = (event) => {
       console.log(`Sign out`);
       firebase.auth().signOut().then(function () {
         console.log("You are now signed out");
       }).catch(function (error) {
         console.log("Sign out error");
       });
-    });
+    };
   }
 
   const createAccountButton = document.querySelector("#createAccountButton");
   if (createAccountButton) {
-    createAccountButton.addEventListener('click', (event) => {
-      event.preventDefault();
+    createAccountButton.onclick = (event) => {
       console.log(`Create account for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
       firebase.auth().createUserWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("Create account error", errorCode, errorMessage);
       });
-    });
+    };
   }
 
   const logInButton = document.querySelector("#logInButton");
   if (logInButton) {
     rhit.startFirebaseUI(); //may want to move to login page controller
-    logInButton.addEventListener('click', (event) => {
-      event.preventDefault();
+    logInButton.onclick = (event) => {
       console.log(`Log in for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
       firebase.auth().signInWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("Existing account log in error", errorCode, errorMessage);
       });
-    });
+    };
   }
 
   const anonymousAuthButton = document.querySelector("#anonymousAuthButton");
   if (anonymousAuthButton) {
-    anonymousAuthButton.addEventListener('click', (event) => {
-      event.preventDefault();
+    anonymousAuthButton.onclick = (event) => {
       firebase.auth().signInAnonymously().catch(function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("Anonymous auth error", errorCode, errorMessage);
       });
-    });
+    };
   }
 
   firebase.auth().onAuthStateChanged((user) => {
@@ -295,22 +294,22 @@ rhit.main = function () {
       const photoURL = user.photoURL;
       const isAnonymous = user.isAnonymous;
       const uid = user.uid;
-  
+
       console.log("The user is signed in ", uid);
       console.log('displayName :>> ', displayName);
       console.log('email :>> ', email);
       console.log('photoURL :>> ', photoURL);
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
-  
-      if (document.querySelector("#mainPage") && !rhit.mainPageControllerInstance) {
-        rhit.mainPageControllerInstance = new rhit.mainPageController();
-      } 
     } else {
       console.log("There is no user signed in!");
     }
+
+    if (document.querySelector("#mainPage")) {
+      rhit.mainPageController = new rhit.mainPageController();
+      window.location.href = 'mainPage.html';
+    }
   });
-  
 };
 
 rhit.startFirebaseUI = function () {
@@ -321,11 +320,6 @@ rhit.startFirebaseUI = function () {
       firebase.auth.EmailAuthProvider.PROVIDER_ID,
       firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
     ],
-    callbacks: {
-      signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-        return false; // Prevent automatic redirection after sign-in
-      }
-    }
   };
   const ui = new firebaseui.auth.AuthUI(firebase.auth());
   ui.start('#firebaseui-auth-container', uiConfig);
