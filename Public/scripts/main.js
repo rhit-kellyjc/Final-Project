@@ -278,41 +278,7 @@ rhit.main = function () {
     };
   }
 
-  const createAccountButton = document.querySelector("#createAccountButton");
-  if (createAccountButton) {
-    createAccountButton.onclick = (event) => {
-      console.log(`Create account for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
-      firebase.auth().createUserWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        console.log("Create account error", errorCode, errorMessage);
-      });
-    };
-  }
-
-  const logInButton = document.querySelector("#logInButton");
-  if (logInButton) {
-    rhit.startFirebaseUI(); //may want to move to login page controller
-    logInButton.onclick = (event) => {
-      console.log(`Log in for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
-      firebase.auth().signInWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        console.log("Existing account log in error", errorCode, errorMessage);
-      });
-    };
-  }
-
-  const anonymousAuthButton = document.querySelector("#anonymousAuthButton");
-  if (anonymousAuthButton) {
-    anonymousAuthButton.onclick = (event) => {
-      firebase.auth().signInAnonymously().catch(function (error) {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        console.log("Anonymous auth error", errorCode, errorMessage);
-      });
-    };
-  }
+  rhit.startFirebaseUI(); //may want to move to login page controller
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
