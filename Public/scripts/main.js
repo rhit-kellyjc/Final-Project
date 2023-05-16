@@ -2,6 +2,7 @@ var rhit = rhit || {};
 
 rhit.mainPageController = class {
   constructor() {
+
 // Connect to Firestore using a callback
   this.connectToFirestore(() => {
     this.todosCollection = firebase.firestore().collection('Todos');
@@ -278,7 +279,6 @@ rhit.main = function () {
     };
   }
 
-  rhit.startFirebaseUI(); //may want to move to login page controller
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
@@ -300,6 +300,7 @@ rhit.main = function () {
       }
     } else {
       console.log("There is no user signed in!");
+      rhit.startFirebaseUI();
     }
   });
 };
