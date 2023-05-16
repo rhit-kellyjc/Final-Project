@@ -7,6 +7,9 @@ rhit.mainPageController = class {
     this.todosCollection = firebase.firestore().collection('Todos');
   });
 
+
+
+
     //use a callback to connect to firestore
     this.minutesElement = document.querySelector('.minutes');
     this.secondsElement = document.querySelector('.seconds');
@@ -47,7 +50,6 @@ rhit.mainPageController = class {
 
       document.getElementById('todoText').value = '';
     });
-    
     this.saveSettingsButton.addEventListener('click', () => {
       const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
       const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
@@ -141,6 +143,31 @@ rhit.mainPageController = class {
   
     return todoItem;
   }
+
+
+
+  addTodoItem(text, cycles) {
+    const todoItem = this.constructTodoItem(text, cycles);
+
+    // Save the todo to Firestore
+    this.todosCollection.add({
+      text: text,
+      cycles: cycles,
+      lastTouched: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then((docRef) => {
+      // Assign a unique ID to the todo item
+      todoItem.dataset.todoId = docRef.id;
+
+      // Append the todo item to the list
+      this.todoList.appendChild(todoItem);
+    })
+    .catch((error) => {
+      console.error('Error adding todo: ', error);
+    });
+  }
+
+
 
   changeTheme() {
     const selectedTheme = themeSelect.value;
@@ -301,13 +328,12 @@ rhit.main = function () {
       console.log('photoURL :>> ', photoURL);
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
+
+      if (document.querySelector("#mainPage")) {
+        rhit.mainPageController = new rhit.mainPageController();
+      }
     } else {
       console.log("There is no user signed in!");
-    }
-
-    if (document.querySelector("#mainPage")) {
-      rhit.mainPageController = new rhit.mainPageController();
-      window.location.href = 'mainPage.html';
     }
   });
 };
