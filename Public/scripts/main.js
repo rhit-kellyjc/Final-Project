@@ -1,5 +1,7 @@
 var rhit = rhit || {};
 
+rhit.mainPageControllerInstance = null;
+
 rhit.mainPageController = class {
   constructor() {
 // Connect to Firestore using a callback
@@ -48,11 +50,11 @@ rhit.mainPageController = class {
       document.getElementById('todoText').value = '';
     });
     
-    this.saveSettingsButton.addEventListener('click', () => {
+    this.saveSettingsButton.addEventListener('click', (event) => {
+      event.preventDefault();
       const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
       const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
       const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
-
 
       if (pomodoroDuration >= 0 && longBreakDuration >= 0 && shortBreakDuration >= 0) {
         this.setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration);
@@ -60,11 +62,7 @@ rhit.mainPageController = class {
       } else {
         alert("Invalid durations. Durations must be positive.");
       }
-
-
-      $('#settingsModal').modal('hide');
     });
-
   }
 
   connectToFirestore(callback) {
@@ -241,50 +239,54 @@ rhit.main = function () {
 
   const signOutButton = document.querySelector("#signOutButton");
   if (signOutButton) {
-    signOutButton.onclick = (event) => {
+    signOutButton.addEventListener('click', (event) => {
+      event.preventDefault();
       console.log(`Sign out`);
       firebase.auth().signOut().then(function () {
         console.log("You are now signed out");
       }).catch(function (error) {
         console.log("Sign out error");
       });
-    };
+    });
   }
 
   const createAccountButton = document.querySelector("#createAccountButton");
   if (createAccountButton) {
-    createAccountButton.onclick = (event) => {
+    createAccountButton.addEventListener('click', (event) => {
+      event.preventDefault();
       console.log(`Create account for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
       firebase.auth().createUserWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("Create account error", errorCode, errorMessage);
       });
-    };
+    });
   }
 
   const logInButton = document.querySelector("#logInButton");
   if (logInButton) {
     rhit.startFirebaseUI(); //may want to move to login page controller
-    logInButton.onclick = (event) => {
+    logInButton.addEventListener('click', (event) => {
+      event.preventDefault();
       console.log(`Log in for email: ${inputEmailEl.value} password:  ${inputPasswordEl.value}`);
       firebase.auth().signInWithEmailAndPassword(inputEmailEl.value, inputPasswordEl.value).catch(function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("Existing account log in error", errorCode, errorMessage);
       });
-    };
+    });
   }
 
   const anonymousAuthButton = document.querySelector("#anonymousAuthButton");
   if (anonymousAuthButton) {
-    anonymousAuthButton.onclick = (event) => {
+    anonymousAuthButton.addEventListener('click', (event) => {
+      event.preventDefault();
       firebase.auth().signInAnonymously().catch(function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("Anonymous auth error", errorCode, errorMessage);
       });
-    };
+    });
   }
 
   firebase.auth().onAuthStateChanged((user) => {
@@ -294,22 +296,27 @@ rhit.main = function () {
       const photoURL = user.photoURL;
       const isAnonymous = user.isAnonymous;
       const uid = user.uid;
-
+  
       console.log("The user is signed in ", uid);
       console.log('displayName :>> ', displayName);
       console.log('email :>> ', email);
       console.log('photoURL :>> ', photoURL);
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
+  
+      if (document.querySelector("#mainPage") && !rhit.mainPageControllerInstance) {
+        rhit.mainPageControllerInstance = new rhit.mainPageController();
+        if (window.location.href.indexOf('mainPage.html') === -1) {
+          window.location.href = 'mainPage.html';
+        }
+      }
+      
+      
     } else {
       console.log("There is no user signed in!");
     }
-
-    if (document.querySelector("#mainPage")) {
-      rhit.mainPageController = new rhit.mainPageController();
-      window.location.href = 'mainPage.html';
-    }
   });
+  
 };
 
 rhit.startFirebaseUI = function () {
