@@ -192,6 +192,10 @@ rhit.mainPageController = class {
         document.body.style.backgroundSize = "cover";
         document.body.style.backgroundImage = "url('images/whiteSoxPark.jpg')";
         break;
+      case 'Rose Hulman':
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundImage = "url('https://www.commonapp.org/static/0343dfd8aab28ca8d9de4a8010a73c61/rose-hulman-institute-technology_865.jpg')";
+        break;
     }
   }
 
