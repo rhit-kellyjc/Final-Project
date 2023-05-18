@@ -272,16 +272,17 @@ rhit.main = function () {
   const inputPasswordEl = document.querySelector("#inputPassword");
 
   const signOutButton = document.querySelector("#signOutButton");
-  if (signOutButton) {
-    signOutButton.onclick = (event) => {
-      console.log(`Sign out`);
-      firebase.auth().signOut().then(function () {
-        console.log("You are now signed out");
-      }).catch(function (error) {
-        console.log("Sign out error");
-      });
-    };
-  }
+if (signOutButton) {
+  signOutButton.onclick = (event) => {
+    console.log(`Sign out`);
+    firebase.auth().signOut().then(function () {
+      console.log("You are now signed out");
+      window.location.href = "login.html"; // Redirect to the login page
+    }).catch(function (error) {
+      console.log("Sign out error");
+    });
+  };
+}
 
 
   firebase.auth().onAuthStateChanged((user) => {
