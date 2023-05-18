@@ -2,6 +2,8 @@ body {
     background-color: lightblue;
     font-family: bahnschrift;
     text-align: left;
+    /* margin: 0 auto; */
+    /* padding: 0 1rem; */
 }
 
 /* Pomodoro Timer Header */
@@ -71,6 +73,14 @@ button:hover {
 button:active {
     transform: translateY(1px);
     box-shadow: none;
+}
+
+.button-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /* other styles */
 }
 
 .button-container,
@@ -167,12 +177,6 @@ button:active {
     margin-left: 6%;
 }
 
-
-
-
-
-
-
 .todo-container h2 {
     font-size: 24px;
     font-weight: bold;
@@ -188,10 +192,15 @@ button:active {
     color: #333;
 }
 
+.todo-item:last-child {
+    border-bottom: none;
+}
+
 .timer-container,
 .todo-container {
-    flex: 1;
-    width: 100%;
+    flex: 1 0 300px;
+    margin: 0 0.5rem;
+    box-sizing: border-box;
 }
 
 .timer-container {
@@ -247,14 +256,8 @@ h2 {
 
 
 .sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 30px;
-    background-color: #f8f8f8;
-    border: 1px solid #ccc;
-    padding: 5px;
-    justify-items: center;
+    position: sticky;
+    top: 1rem;
 }
 
 .sidebar img {
@@ -265,9 +268,9 @@ h2 {
 
 .container {
     display: flex;
-    margin: 3rem 0rem 3rem 3rem;
-    color: rgb(21, 21, 60);
-    justify-content: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .welcome-block {
@@ -315,5 +318,17 @@ h2 {
 }
 
 .todo-item {
-    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #ccc;
+}
+
+#firebaseui-auth-container {
+    width: 100vw;  /* viewport width */
+    height: 100vh; /* viewport height */
+    max-width: 100%;
+    max-height: 100%;
 }

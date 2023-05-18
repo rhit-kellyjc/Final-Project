@@ -377,11 +377,19 @@ rhit.main = function () {
       console.log('photoURL :>> ', photoURL);
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
+<<<<<<< HEAD
       
       if (!document.querySelector("#mainPage")) {
         window.location.href = '/pomodoro';
       }
       
+=======
+
+      if(!document.querySelector("#mainPage")) {
+        window.location.href = '/pomodoro';
+      }
+
+>>>>>>> 36eb3a787b43a1a4bab78bd75adb67e4ffc9207b
       if (document.querySelector("#mainPage")) {
         rhit.mainPageController = new rhit.mainPageController();
       }
