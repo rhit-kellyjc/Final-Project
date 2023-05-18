@@ -53,21 +53,27 @@ rhit.mainPageController = class {
       document.getElementById('todoText').value = '';
     });
     this.saveSettingsButton.addEventListener('click', () => {
-      const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
-      const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
-      const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
+  const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
+  const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
+  const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
+  const theme = document.querySelector('#themeSelect').value;
 
-
-      if (pomodoroDuration >= 0 && longBreakDuration >= 0 && shortBreakDuration >= 0) {
-        this.setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration);
-        $('#settingsModal').modal('hide');
-      } else {
-        alert("Invalid durations. Durations must be positive.");
-      }
-
-
-      $('#settingsModal').modal('hide');
-    });
+  // Save the settings to Firestore with the associated user ID
+  firebase.firestore().collection('Settings').doc(this.userId).set({
+    pomodoro: pomodoroDuration,
+    shortBreak: shortBreakDuration,
+    longBreak: longBreakDuration,
+    theme: theme,
+    userId: this.userId
+  })
+  .then(() => {
+    console.log('Settings saved successfully');
+    $('#settingsModal').modal('hide');
+  })
+  .catch((error) => {
+    console.error('Error saving settings: ', error);
+  });
+});
 
   }
 
@@ -78,6 +84,8 @@ rhit.mainPageController = class {
         firebase.firestore().enablePersistence()
           .then(() => {
             callback();
+            // Load the user's settings
+            this.loadSettings();
           })
           .catch((error) => {
             console.error('Error enabling Firestore persistence: ', error);
@@ -89,6 +97,7 @@ rhit.mainPageController = class {
       }
     });
   }
+  
 
 
   addTodoItem(text, cycles) {
@@ -173,6 +182,33 @@ rhit.mainPageController = class {
     return todoItem;
   }
 
+  loadSettings() {
+    if (this.userId) {
+      firebase.firestore().collection('Settings').doc(this.userId).get()
+        .then((doc) => {
+          if (doc.exists) {
+            const settingsData = doc.data();
+            const pomodoroDuration = settingsData.pomodoro;
+            const shortBreakDuration = settingsData.shortbreak;
+            const longBreakDuration = settingsData.longbreak;
+            const theme = settingsData.theme;
+  
+            // Set the values of the input fields and update the durations
+            document.querySelector('#pomodoroDuration').value = pomodoroDuration;
+            document.querySelector('#shortBreakDuration').value = shortBreakDuration;
+            document.querySelector('#longBreakDuration').value = longBreakDuration;
+            document.querySelector('#themeSelect').value = theme;
+  
+            this.setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration);
+            this.changeTheme();
+          }
+        })
+        .catch((error) => {
+          console.error('Error loading settings: ', error);
+        });
+    }
+  }
+  
 
   loadTodos() {
     if (this.userId) {
@@ -290,6 +326,20 @@ rhit.mainPageController = class {
 
 };
 
+rhit.startFirebaseUI = function () {
+  var uiConfig = {
+    signInSuccessUrl: '/mainPage.html',
+    signInOptions: [
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+    ],
+  };
+  const ui = new firebaseui.auth.AuthUI(firebase.auth());
+  ui.start('#firebaseui-auth-container', uiConfig);
+};
+
+
 rhit.main = function () {
   const inputEmailEl = document.querySelector("#inputEmail");
   const inputPasswordEl = document.querySelector("#inputPassword");
@@ -297,15 +347,14 @@ rhit.main = function () {
   const signOutButton = document.querySelector("#signOutButton");
   if (signOutButton) {
     signOutButton.onclick = (event) => {
-      console.log(`Sign out`);
-      firebase.auth().signOut().then(function () {
+      firebase.auth().signOut().then(() => {
         console.log("You are now signed out");
-      }).catch(function (error) {
-        console.log("Sign out error");
+        window.location.href = "/"; // Redirect to the sign-in page after signing out
+      }).catch((error) => {
+        console.log("Sign out error:", error);
       });
     };
   }
-
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
@@ -326,23 +375,13 @@ rhit.main = function () {
         rhit.mainPageController = new rhit.mainPageController();
       }
     } else {
-      console.log("There is no user signed in!");
+      if (!document.querySelector("#loginPage")) {
+        window.location.href = "/"; // Redirect to the sign-in page
+      }
       rhit.startFirebaseUI();
     }
   });
 };
 
-rhit.startFirebaseUI = function () {
-  var uiConfig = {
-    signInSuccessUrl: '/mainPage.html',
-    signInOptions: [
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
-    ],
-  };
-  const ui = new firebaseui.auth.AuthUI(firebase.auth());
-  ui.start('#firebaseui-auth-container', uiConfig);
-};
 
 rhit.main();
