@@ -371,6 +371,10 @@ rhit.main = function () {
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
 
+      if(!document.querySelector("#mainPage")) {
+        window.location.href = '/pomodoro';
+      }
+
       if (document.querySelector("#mainPage")) {
         rhit.mainPageController = new rhit.mainPageController();
       }
