@@ -8,13 +8,20 @@
     <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
     <title>Pomodoro Timer</title>
 </head>
 
 <body>
     <!-- Modal dialog box -->
     <div id="mainPage">
-        <div class="pomodoro-header">Pomodoro Timer</div>
+        <div class="pomodoro-header">
+            <div class="header-content">
+                <span>Pomodoro Timer</span>
+                <button id="signOutButton" type="button" class="btn text-light">Sign Out</button>
+            </div>
+        </div>
         <div class="modal" id="spotifyModal" tabindex="-1" role="dialog" aria-labelledby="spotifyModalLabel"
             aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -185,14 +192,6 @@
         </div>
         <!-- End timer wrapper -->
 
-        <div class="sidebar">
-            <a href="https://twitter.com/jkelly_1214" target="_blank">
-                <img src="images/twitter.png" alt="Twitter">
-            </a>
-            <a href="https://github.com/jack-kelly-12" target="_blank">
-                <img src="images/github-sign.png" alt="Github">
-            </a>
-        </div>
 
         <div class="button-container">
             <button class="long-break">Long Break</button>
