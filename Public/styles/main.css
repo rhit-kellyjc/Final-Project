@@ -337,6 +337,11 @@ h2 {
     border-width: 50px;
 }
 
+.menu-button,
+.sidebar {
+    display: none;
+}
+
 @media (max-width: 768px) {
     #demoContainer {
         display: none;
@@ -360,8 +365,9 @@ h2 {
         display: none;
     }
 
-    body, html {
-       background-color: lightblue !important;
+    body,
+    html {
+        background-color: lightblue !important;
     }
 
     .todo-container {
@@ -369,17 +375,57 @@ h2 {
     }
 
     .timer {
-        width: 20rem;
-        height: 20rem;
+        width: 19rem;
+        height: 19rem;
     }
 
-    .minutes, .colon, .seconds {
+    .minutes,
+    .colon,
+    .seconds {
         font-size: 6rem;
     }
 
-    #playButton, #resetButton, #pauseButton, #spotifyButton, #settingsButton {
-        width: 3.7rem;
-        height: 3.7rem;
+    #playButton,
+    #resetButton,
+    #pauseButton,
+    #spotifyButton,
+    #settingsButton {
+        width: 3.5rem;
+        height: 3.5rem;
     }
-    
+
+    .menu-button {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .menu-icon {
+        width: 20px;
+        height: 2px;
+        background-color: white;
+        margin: 2px;
+    }
+
+
+    .sidebar {
+        width: 250px;
+        height: 100%;
+        background-color: #f1f1f1;
+        position: fixed;
+        top: 0;
+        left: -250px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar-open {
+        transform: translateX(0);
+    }
+
 }

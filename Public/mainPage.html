@@ -18,10 +18,22 @@
     <div id="mainPage">
         <div class="pomodoro-header">
             <div class="header-content">
+                <button class="menu-button" onclick="openSidebar()">
+                    <div class="menu-icon"></div>
+                    <div class="menu-icon"></div>
+                    <div class="menu-icon"></div>
+                </button>
                 <span>Pomodoro Timer</span>
                 <button id="signOutButton" type="button" class="btn text-light">Sign Out</button>
             </div>
         </div>
+
+        <div id="sidebar" class="sidebar">
+            <button class="sidebar-button">View Todos</button>
+            <button class="sidebar-button">Sign Out</button>
+        </div>
+
+
         <div class="modal" id="spotifyModal" tabindex="-1" role="dialog" aria-labelledby="spotifyModalLabel"
             aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -210,6 +222,10 @@
 <script src="scripts/bootstrap-material-design.js"></script>
 <script>
     $("body").bootstrapMaterialDesign();
+
+    function openSidebar() {
+        document.getElementById('sidebar').classList.toggle('sidebar-open');
+    }
 </script>
 <script src="/__/firebase/7.18.0/firebase-app.js"></script>
 <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>

@@ -150,14 +150,12 @@ rhit.mainPageController = class {
     doneText.textContent = 'Done?';
     doneText.classList.add('done-text');
 
-    // Set the todoId as a data attribute on the button
-    doneText.dataset.todoId = todoId; // Use the passed todoId parameter
+    doneText.dataset.todoId = todoId; 
 
     doneText.addEventListener('click', (event) => {
       todoItem.remove();
-      const todoId = event.target.dataset.todoId; // Retrieve the todo ID from the button's data attribute
+      const todoId = event.target.dataset.todoId; 
 
-      // Delete the todo document from the database
       firebase
         .firestore()
         .collection('Todos')
@@ -171,9 +169,7 @@ rhit.mainPageController = class {
         });
     });
 
-    todoItem.appendChild(doneText); // Make sure to add the button to the todoItem element after setting the event listener and data attribute.
-
-
+    todoItem.appendChild(doneText); 
 
     const editButton = document.createElement('button');
     editButton.textContent = 'Edit';
@@ -194,7 +190,6 @@ rhit.mainPageController = class {
         todoText.textContent = `${text} (${cycles} cycles)`;
         $('#editModal').modal('hide');
 
-        // Update the todo document in the database
         firebase
           .firestore()
           .collection('Todos')
@@ -220,6 +215,7 @@ rhit.mainPageController = class {
     return todoItem;
   }
 
+
   loadSettings() {
     if (this.userId) {
       firebase
@@ -231,11 +227,10 @@ rhit.mainPageController = class {
           if (doc.exists) {
             const settingsData = doc.data();
             const pomodoroDuration = settingsData.pomodoro || 25;
-            const shortBreakDuration = settingsData.shortBreak || 5; // Corrected property name
-            const longBreakDuration = settingsData.longBreak || 15; // Corrected property name
+            const shortBreakDuration = settingsData.shortBreak || 5; 
+            const longBreakDuration = settingsData.longBreak || 15; 
             const theme = settingsData.theme;
 
-            // Set the values of the input fields and update the durations
             document.querySelector('#pomodoroDuration').value = pomodoroDuration;
             document.querySelector('#shortBreakDuration').value = shortBreakDuration;
             document.querySelector('#longBreakDuration').value = longBreakDuration;
@@ -256,8 +251,8 @@ rhit.mainPageController = class {
   loadTodos() {
     if (this.userId) {
       this.todosCollection
-        .where('userId', '==', this.userId) // Query todos with the current user's ID
-        .orderBy('lastTouched', 'desc') // Order by lastTouched field
+        .where('userId', '==', this.userId) 
+        .orderBy('lastTouched', 'desc') 
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
@@ -316,10 +311,9 @@ rhit.mainPageController = class {
       clearInterval(this.intervalId);
       this.playSound('soundEffects/bellRinging.mp3');
 
-      // Get the todo item ID
+    
       const todoId = this.todoList.firstElementChild.dataset.todoId;
 
-      // Update the lastTouched field in Firestore
       this.todosCollection.doc(todoId).update({
           lastTouched: firebase.firestore.FieldValue.serverTimestamp()
         })
@@ -393,7 +387,7 @@ rhit.main = function () {
     signOutButton.onclick = (event) => {
       firebase.auth().signOut().then(() => {
         console.log("You are now signed out");
-        window.location.href = "/"; // Redirect to the sign-in page after signing out
+        window.location.href = "/"; 
         rhit.startFirebaseUI();
       }).catch((error) => {
         console.log("Sign out error:", error);
@@ -425,7 +419,7 @@ rhit.main = function () {
       }
     } else {
       if (!document.querySelector("#loginPage")) {
-        window.location.href = "/"; // Redirect to the sign-in page
+        window.location.href = "/"; 
       }
       rhit.startFirebaseUI();
     }
