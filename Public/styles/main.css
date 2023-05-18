@@ -1,12 +1,12 @@
 body {
     background-color: lightblue;
-    font-family: bahnschrift;
+    font-family: bahnschrift, sans-serif;
     text-align: left;
-    /* margin: 0 auto; */
-    /* padding: 0 1rem; */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
-/* Pomodoro Timer Header */
 .pomodoro-header {
     font-size: 1.5rem;
     font-weight: bold;
@@ -15,6 +15,8 @@ body {
     background-color: #00073db7;
     color: white;
     padding: 0.5rem 0.5rem;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 /* Timer */
@@ -302,7 +304,8 @@ h2 {
     justify-content: space-between;
 }
 
-.todo-item .edit-button, .done-text {
+.todo-item .edit-button,
+.done-text {
     background: none;
     border: none;
     font-size: 12px;
@@ -318,17 +321,65 @@ h2 {
 }
 
 .todo-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding: 1rem;
-    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
 }
 
-#firebaseui-auth-container {
-    width: 100vw;  /* viewport width */
-    height: 100vh; /* viewport height */
-    max-width: 100%;
-    max-height: 100%;
+.login-section {
+    display: flex;
+    align-items: center;
+}
+
+#demo {
+    max-width: 40vw;
+    margin-top: 20vh;
+    border-color: white;
+    border-radius: 5px;
+    border-width: 50px;
+}
+
+@media (max-width: 768px) {
+    #demoContainer {
+        display: none;
+    }
+
+    .welcome-block {
+        max-width: 100%;
+        font-size: .8rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+        max-width: 100%;
+    }
+
+    #firebaseui-auth-container {
+        max-width: min-content;
+    }
+
+    #settingsModal #theme {
+        display: none;
+    }
+
+    body, html {
+       background-color: lightblue !important;
+    }
+
+    .todo-container {
+        display: none;
+    }
+
+    .timer {
+        width: 20rem;
+        height: 20rem;
+    }
+
+    .minutes, .colon, .seconds {
+        font-size: 6rem;
+    }
+
+    #playButton, #resetButton, #pauseButton, #spotifyButton, #settingsButton {
+        width: 3.7rem;
+        height: 3.7rem;
+    }
+    
 }

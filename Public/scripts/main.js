@@ -54,27 +54,27 @@ rhit.mainPageController = class {
       document.getElementById('todoText').value = '';
     });
     this.saveSettingsButton.addEventListener('click', () => {
-  const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
-  const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
-  const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
-  const theme = document.querySelector('#themeSelect').value;
+      const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
+      const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
+      const longBreakDuration = parseInt(document.querySelector('#longBreakDuration').value);
+      const theme = document.querySelector('#themeSelect').value;
 
-  // Save the settings to Firestore with the associated user ID
-  firebase.firestore().collection('Settings').doc(this.userId).set({
-    pomodoro: pomodoroDuration,
-    shortBreak: shortBreakDuration,
-    longBreak: longBreakDuration,
-    theme: theme,
-    userId: this.userId
-  })
-  .then(() => {
-    console.log('Settings saved successfully');
-    $('#settingsModal').modal('hide');
-  })
-  .catch((error) => {
-    console.error('Error saving settings: ', error);
-  });
-});
+      // Save the settings to Firestore with the associated user ID
+      firebase.firestore().collection('Settings').doc(this.userId).set({
+          pomodoro: pomodoroDuration,
+          shortBreak: shortBreakDuration,
+          longBreak: longBreakDuration,
+          theme: theme,
+          userId: this.userId
+        })
+        .then(() => {
+          console.log('Settings saved successfully');
+          $('#settingsModal').modal('hide');
+        })
+        .catch((error) => {
+          console.error('Error saving settings: ', error);
+        });
+    });
 
   }
 
@@ -82,7 +82,9 @@ rhit.mainPageController = class {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.userId = user.uid;
-        firebase.firestore().enablePersistence({ synchronizeTabs: true }) // Add synchronizeTabs: true option
+        firebase.firestore().enablePersistence({
+            synchronizeTabs: true
+          }) // Add synchronizeTabs: true option
           .then(() => {
             callback();
             this.loadSettings();
@@ -97,12 +99,13 @@ rhit.mainPageController = class {
       }
     });
   }
-  
-  
+
+
 
 
   addTodoItem(text, cycles) {
-    const todoItem = this.constructTodoItem(text, cycles);
+    const todoItem = this.constructTodoItem(doc.data().text, doc.data().cycles, doc.id);
+
 
     // Save the todo to Firestore with the associated user ID
     this.todosCollection.add({
@@ -135,7 +138,7 @@ rhit.mainPageController = class {
     audio.play();
   }
 
-  constructTodoItem(text, cycles) {
+  constructTodoItem(text, cycles, todoId) {
     const todoItem = document.createElement('li');
     todoItem.classList.add('todo-item');
 
@@ -146,11 +149,31 @@ rhit.mainPageController = class {
     const doneText = document.createElement('button');
     doneText.textContent = 'Done?';
     doneText.classList.add('done-text');
-    todoItem.appendChild(doneText);
 
-    doneText.addEventListener('click', () => {
+    // Set the todoId as a data attribute on the button
+    doneText.dataset.todoId = todoId; // Use the passed todoId parameter
+
+    doneText.addEventListener('click', (event) => {
       todoItem.remove();
+      const todoId = event.target.dataset.todoId; // Retrieve the todo ID from the button's data attribute
+
+      // Delete the todo document from the database
+      firebase
+        .firestore()
+        .collection('Todos')
+        .doc(todoId)
+        .delete()
+        .then(() => {
+          console.log('Todo deleted successfully');
+        })
+        .catch((error) => {
+          console.error('Error deleting todo: ', error);
+        });
     });
+
+    todoItem.appendChild(doneText); // Make sure to add the button to the todoItem element after setting the event listener and data attribute.
+
+
 
     const editButton = document.createElement('button');
     editButton.textContent = 'Edit';
@@ -164,17 +187,31 @@ rhit.mainPageController = class {
       editTodoText.value = text;
       editCycleCount.value = cycles;
 
-
       const saveEditButton = document.getElementById('saveEditButton');
       saveEditButton.addEventListener('click', () => {
         text = editTodoText.value;
         cycles = editCycleCount.value;
         todoText.textContent = `${text} (${cycles} cycles)`;
         $('#editModal').modal('hide');
+
+        // Update the todo document in the database
+        firebase
+          .firestore()
+          .collection('Todos')
+          .doc(todoId)
+          .update({
+            text: text,
+            cycles: cycles
+          })
+          .then(() => {
+            console.log('Todo updated successfully');
+          })
+          .catch((error) => {
+            console.error('Error updating todo: ', error);
+          });
       });
 
       $('#editModal').modal('show');
-
     });
 
     todoItem.appendChild(editButton);
@@ -193,17 +230,17 @@ rhit.mainPageController = class {
         .then((doc) => {
           if (doc.exists) {
             const settingsData = doc.data();
-            const pomodoroDuration = settingsData.pomodoro;
-            const shortBreakDuration = settingsData.shortBreak; // Corrected property name
-            const longBreakDuration = settingsData.longBreak; // Corrected property name
+            const pomodoroDuration = settingsData.pomodoro || 25;
+            const shortBreakDuration = settingsData.shortBreak || 5; // Corrected property name
+            const longBreakDuration = settingsData.longBreak || 15; // Corrected property name
             const theme = settingsData.theme;
-  
+
             // Set the values of the input fields and update the durations
             document.querySelector('#pomodoroDuration').value = pomodoroDuration;
             document.querySelector('#shortBreakDuration').value = shortBreakDuration;
             document.querySelector('#longBreakDuration').value = longBreakDuration;
             document.querySelector('#themeSelect').value = theme;
-  
+
             this.setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration);
             this.changeTheme();
           }
@@ -213,8 +250,8 @@ rhit.mainPageController = class {
         });
     }
   }
-  
-  
+
+
 
   loadTodos() {
     if (this.userId) {
@@ -224,7 +261,8 @@ rhit.mainPageController = class {
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            const todoItem = this.constructTodoItem(doc.data().text, doc.data().cycles);
+            const todoItem = this.constructTodoItem(doc.data().text, doc.data().cycles, doc.id);
+
             todoItem.dataset.todoId = doc.id;
             this.todoList.appendChild(todoItem);
           });
@@ -377,19 +415,11 @@ rhit.main = function () {
       console.log('photoURL :>> ', photoURL);
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
-<<<<<<< HEAD
-      
+
       if (!document.querySelector("#mainPage")) {
         window.location.href = '/pomodoro';
       }
-      
-=======
 
-      if(!document.querySelector("#mainPage")) {
-        window.location.href = '/pomodoro';
-      }
-
->>>>>>> 36eb3a787b43a1a4bab78bd75adb67e4ffc9207b
       if (document.querySelector("#mainPage")) {
         rhit.mainPageController = new rhit.mainPageController();
       }

@@ -13,7 +13,6 @@
 </head>
 
 <body>
-
     <div class="pomodoro-header">
         <div class="header-content">
             <span>Pomodoro Timer</span>
@@ -21,22 +20,46 @@
     </div>
 
     <div id="loginPage" class="container">
-        <div class="welcome-block">
-            <h1 class="main-heading">Why RHIT Pomodoro Timer?</h1>
-            <p class="paragraph">RHIT Pomodoro Timer is an <b><i>integrated studying experience.</i></b></p>
-            <p class="paragraph">RHIT Pomodoro Timer is created by students for students. We know it's not always easy
-                to focus.
-                That's why we built a single app that allows students to get work done efficiently.</p>
-            <p class="cta-text">Login or sign up to get work done!</p>
+        <div class="row">
+            <div class="col-lg-6 col-md-12">
+                <div class="welcome-block">
+                    <h1 class="main-heading">Why RHIT Pomodoro Timer?</h1>
+                    <p class="paragraph">RHIT Pomodoro Timer is an <b><i>integrated studying experience.</i></b></p>
+                    <p class="paragraph">RHIT Pomodoro Timer is created by students for students. We know it's not always easy
+                        to focus.
+                        That's why we built a single app that allows students to get work done efficiently.</p>
+                    <p class="cta-text">Login or sign up to get work done!</p>
 
-            <p><b>Created by: <i>Jack Kelly &</i>
-                    <i>Nick Carlson</i></b></p>
+                    <p><b>Created by: <i>Jack Kelly &</i>
+                            <i>Nick Carlson</i></b></p>
+                    <div class="login-section">
+                        <div id="firebaseui-auth-container"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div id="demoContainer">
+                    <img id="demo" src="images/demo.JPG">
+                </div>
+            </div>
         </div>
-        <div class="login-section">
-            <div id="firebaseui-auth-container"></div>
-        </div>
-
     </div>
+
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/popper.js"></script>
+    <script src="scripts/bootstrap-material-design.js"></script>
+    <script>
+        $("body").bootstrapMaterialDesign();
+    </script>
+    <script src="/__/firebase/7.18.0/firebase-app.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+    <script src="/__/firebase
+
+
+
+
+
+
     <script src="scripts/jquery.min.js"></script>
     <script src="scripts/popper.js"></script>
     <script src="scripts/bootstrap-material-design.js"></script>
