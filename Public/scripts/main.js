@@ -7,6 +7,7 @@ rhit.mainPageController = class {
     this.connectToFirestore(() => {
       this.todosCollection = firebase.firestore().collection('Todos');
       this.loadTodos();
+      this.loadSettings();
     });
 
 
@@ -81,10 +82,9 @@ rhit.mainPageController = class {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.userId = user.uid;
-        firebase.firestore().enablePersistence()
+        firebase.firestore().enablePersistence({ synchronizeTabs: true }) // Add synchronizeTabs: true option
           .then(() => {
             callback();
-            // Load the user's settings
             this.loadSettings();
           })
           .catch((error) => {
@@ -97,6 +97,7 @@ rhit.mainPageController = class {
       }
     });
   }
+  
   
 
 
@@ -184,13 +185,17 @@ rhit.mainPageController = class {
 
   loadSettings() {
     if (this.userId) {
-      firebase.firestore().collection('Settings').doc(this.userId).get()
+      firebase
+        .firestore()
+        .collection('Settings')
+        .doc(this.userId)
+        .get()
         .then((doc) => {
           if (doc.exists) {
             const settingsData = doc.data();
             const pomodoroDuration = settingsData.pomodoro;
-            const shortBreakDuration = settingsData.shortbreak;
-            const longBreakDuration = settingsData.longbreak;
+            const shortBreakDuration = settingsData.shortBreak; // Corrected property name
+            const longBreakDuration = settingsData.longBreak; // Corrected property name
             const theme = settingsData.theme;
   
             // Set the values of the input fields and update the durations
@@ -208,6 +213,7 @@ rhit.mainPageController = class {
         });
     }
   }
+  
   
 
   loadTodos() {
@@ -350,6 +356,7 @@ rhit.main = function () {
       firebase.auth().signOut().then(() => {
         console.log("You are now signed out");
         window.location.href = "/"; // Redirect to the sign-in page after signing out
+        rhit.startFirebaseUI();
       }).catch((error) => {
         console.log("Sign out error:", error);
       });
@@ -370,7 +377,11 @@ rhit.main = function () {
       console.log('photoURL :>> ', photoURL);
       console.log('isAnonymous :>> ', isAnonymous);
       console.log('uid :>> ', uid);
-
+      
+      if (!document.querySelector("#mainPage")) {
+        window.location.href = '/pomodoro';
+      }
+      
       if (document.querySelector("#mainPage")) {
         rhit.mainPageController = new rhit.mainPageController();
       }
