@@ -2,11 +2,12 @@ var rhit = rhit || {};
 
 rhit.mainPageController = class {
   constructor() {
-
-// Connect to Firestore using a callback
-  this.connectToFirestore(() => {
-    this.todosCollection = firebase.firestore().collection('Todos');
-  });
+    this.userId = null;
+    // Connect to Firestore using a callback
+    this.connectToFirestore(() => {
+      this.todosCollection = firebase.firestore().collection('Todos');
+      this.loadTodos();
+    });
 
 
 
@@ -71,36 +72,47 @@ rhit.mainPageController = class {
   }
 
   connectToFirestore(callback) {
-    firebase.firestore().enablePersistence()
-      .then(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.userId = user.uid;
+        firebase.firestore().enablePersistence()
+          .then(() => {
+            callback();
+          })
+          .catch((error) => {
+            console.error('Error enabling Firestore persistence: ', error);
+            callback();
+          });
+      } else {
+        this.userId = null;
         callback();
-      })
-      .catch((error) => {
-        console.error('Error enabling Firestore persistence: ', error);
-        callback();
-      });
-    }
+      }
+    });
+  }
+
 
   addTodoItem(text, cycles) {
     const todoItem = this.constructTodoItem(text, cycles);
 
-    // Save the todo to Firestore
+    // Save the todo to Firestore with the associated user ID
     this.todosCollection.add({
-      text: text,
-      cycles: cycles,
-      lastTouched: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then((docRef) => {
-      // Assign a unique ID to the todo item
-      todoItem.dataset.todoId = docRef.id;
+        text: text,
+        cycles: cycles,
+        userId: this.userId,
+        lastTouched: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then((docRef) => {
+        // Assign a unique ID to the todo item
+        todoItem.dataset.todoId = docRef.id;
 
-      // Append the todo item to the list
-      this.todoList.appendChild(todoItem);
-    })
-    .catch((error) => {
-      console.error('Error adding todo: ', error);
-    });
+        // Append the todo item to the list
+        this.todoList.appendChild(todoItem);
+      })
+      .catch((error) => {
+        console.error('Error adding todo: ', error);
+      });
   }
+
 
   setTimerDurations(pomodoroDuration, longBreakDuration, shortBreakDuration) {
     this.pomodoroDuration = pomodoroDuration * 60;
@@ -116,59 +128,70 @@ rhit.mainPageController = class {
   constructTodoItem(text, cycles) {
     const todoItem = document.createElement('li');
     todoItem.classList.add('todo-item');
-  
+
     const todoText = document.createElement('div');
     todoText.textContent = `${text} (${cycles} cycles)`;
     todoItem.appendChild(todoText);
-  
+
     const doneText = document.createElement('button');
     doneText.textContent = 'Done?';
     doneText.classList.add('done-text');
     todoItem.appendChild(doneText);
-  
+
     doneText.addEventListener('click', () => {
       todoItem.remove();
     });
-  
+
     const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
     editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>Edit';
     editButton.classList.add('edit-button');
     todoItem.appendChild(editButton);
-  
+
     editButton.addEventListener('click', () => {
-      const newText = prompt('Enter new text:');
-      if (newText) {
-        todoText.textContent = newText;
-      }
+      const editTodoText = document.getElementById('editTodoText');
+      const editCycleCount = document.getElementById('editCycleCount');
+      editTodoText.value = text;
+      editCycleCount.value = cycles;
+
+
+      const saveEditButton = document.getElementById('saveEditButton');
+      saveEditButton.addEventListener('click', () => {
+        text = editTodoText.value;
+        cycles = editCycleCount.value;
+        todoText.textContent = `${text} (${cycles} cycles)`;
+        $('#editModal').modal('hide');
+      });
+
+      $('#editModal').modal('show');
+
     });
-  
+
+    todoItem.appendChild(editButton);
+
+
     return todoItem;
   }
 
 
-
-  addTodoItem(text, cycles) {
-    const todoItem = this.constructTodoItem(text, cycles);
-
-    // Save the todo to Firestore
-    this.todosCollection.add({
-      text: text,
-      cycles: cycles,
-      lastTouched: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then((docRef) => {
-      // Assign a unique ID to the todo item
-      todoItem.dataset.todoId = docRef.id;
-
-      // Append the todo item to the list
-      this.todoList.appendChild(todoItem);
-    })
-    .catch((error) => {
-      console.error('Error adding todo: ', error);
-    });
+  loadTodos() {
+    if (this.userId) {
+      this.todosCollection
+        .where('userId', '==', this.userId) // Query todos with the current user's ID
+        .orderBy('lastTouched', 'desc') // Order by lastTouched field
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const todoItem = this.constructTodoItem(doc.data().text, doc.data().cycles);
+            todoItem.dataset.todoId = doc.id;
+            this.todoList.appendChild(todoItem);
+          });
+        })
+        .catch((error) => {
+          console.error('Error loading todos: ', error);
+        });
+    }
   }
-
-
 
   changeTheme() {
     const selectedTheme = themeSelect.value;
@@ -218,11 +241,11 @@ rhit.mainPageController = class {
 
       // Update the lastTouched field in Firestore
       this.todosCollection.doc(todoId).update({
-        lastTouched: firebase.firestore.FieldValue.serverTimestamp()
-      })
-      .catch((error) => {
-        console.error('Error updating todo: ', error);
-      });
+          lastTouched: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .catch((error) => {
+          console.error('Error updating todo: ', error);
+        });
     }
 
 
