@@ -2,8 +2,8 @@ body {
     background-color: lightblue;
     font-family: bahnschrift;
     text-align: left;
-    margin: 0 auto;
-    padding: 0 1rem;
+    /* margin: 0 auto; */
+    /* padding: 0 1rem; */
 }
 
 /* Pomodoro Timer Header */
@@ -73,6 +73,14 @@ button:hover {
 button:active {
     transform: translateY(1px);
     box-shadow: none;
+}
+
+.button-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /* other styles */
 }
 
 .button-container,
