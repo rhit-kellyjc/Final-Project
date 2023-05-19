@@ -428,4 +428,16 @@ h2 {
         transform: translateX(0);
     }
 
+    .long-break, .short-break, .pomodoro-button {
+        font-size: medium;
+    }
+
+    #signOutButton {
+        display: none;
+    }
+
+    .header-content {
+        align-items: left;
+    }
+
 }
