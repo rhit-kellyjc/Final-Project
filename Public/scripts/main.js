@@ -27,8 +27,9 @@ rhit.mainPageController = class {
     this.themeSelect = document.querySelector('#themeSelect');
     this.saveSettingsButton = document.querySelector("#saveSettingsButton");
     this.todoList = document.querySelector('#todoList');
+    this.mobileTodoList = document.querySelector('#mobileTodoList');
     this.saveTodoButton = document.querySelector('#saveTodoButton');
-
+    this.saveMobileTodoButton = document.querySelector('#saveMobileTodoButton');
 
     this.pomodoroDuration = 25 * 60;
     this.longBreakDuration = 15 * 60;
@@ -47,12 +48,25 @@ rhit.mainPageController = class {
       const cycles = document.getElementById('cycleCount').value;
 
       if (todoText) {
-        this.addTodoItem(todoText, cycles);
+        this.addTodoItem(todoText, cycles, this.userId);
         $('#todoModal').modal('hide');
       }
 
       document.getElementById('todoText').value = '';
     });
+    this.saveMobileTodoButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      const mobileTodoText = document.getElementById('addTodoText').value;
+      const mobileCycles = document.getElementById('addCycleCount').value;
+
+      if (mobileTodoText) {
+        this.addTodoItem(mobileTodoText, mobileCycles, this.userId); // Fixed the variable name
+        $('#addTodoModal').modal('hide');
+      }
+
+      document.getElementById('addTodoText').value = ''; // Fixed the ID used to clear the input field
+    });
+
     this.saveSettingsButton.addEventListener('click', () => {
       const pomodoroDuration = parseInt(document.querySelector('#pomodoroDuration').value);
       const shortBreakDuration = parseInt(document.querySelector('#shortBreakDuration').value);
@@ -103,11 +117,11 @@ rhit.mainPageController = class {
 
 
 
-  addTodoItem(text, cycles) {
-    const todoItem = this.constructTodoItem(doc.data().text, doc.data().cycles, doc.id);
 
+  addTodoItem(text, cycles, todoId) {
+    const todoItemDesktop = this.constructTodoItem(text, cycles, todoId);
+    const todoItemMobile = this.constructTodoItem(text, cycles, todoId);
 
-    // Save the todo to Firestore with the associated user ID
     this.todosCollection.add({
         text: text,
         cycles: cycles,
@@ -115,11 +129,11 @@ rhit.mainPageController = class {
         lastTouched: firebase.firestore.FieldValue.serverTimestamp()
       })
       .then((docRef) => {
-        // Assign a unique ID to the todo item
-        todoItem.dataset.todoId = docRef.id;
+        todoItemDesktop.dataset.todoId = docRef.id;
+        todoItemMobile.dataset.todoId = docRef.id;
 
-        // Append the todo item to the list
         this.todoList.appendChild(todoItem);
+        this.mobileTodoList.appendChild(todoItem);
       })
       .catch((error) => {
         console.error('Error adding todo: ', error);
@@ -150,11 +164,11 @@ rhit.mainPageController = class {
     doneText.textContent = 'Done?';
     doneText.classList.add('done-text');
 
-    doneText.dataset.todoId = todoId; 
+    doneText.dataset.todoId = todoId;
 
     doneText.addEventListener('click', (event) => {
       todoItem.remove();
-      const todoId = event.target.dataset.todoId; 
+      const todoId = event.target.dataset.todoId;
 
       firebase
         .firestore()
@@ -169,7 +183,7 @@ rhit.mainPageController = class {
         });
     });
 
-    todoItem.appendChild(doneText); 
+    todoItem.appendChild(doneText);
 
     const editButton = document.createElement('button');
     editButton.textContent = 'Edit';
@@ -227,8 +241,8 @@ rhit.mainPageController = class {
           if (doc.exists) {
             const settingsData = doc.data();
             const pomodoroDuration = settingsData.pomodoro || 25;
-            const shortBreakDuration = settingsData.shortBreak || 5; 
-            const longBreakDuration = settingsData.longBreak || 15; 
+            const shortBreakDuration = settingsData.shortBreak || 5;
+            const longBreakDuration = settingsData.longBreak || 15;
             const theme = settingsData.theme;
 
             document.querySelector('#pomodoroDuration').value = pomodoroDuration;
@@ -251,15 +265,19 @@ rhit.mainPageController = class {
   loadTodos() {
     if (this.userId) {
       this.todosCollection
-        .where('userId', '==', this.userId) 
-        .orderBy('lastTouched', 'desc') 
+        .where('userId', '==', this.userId)
+        .orderBy('lastTouched', 'desc')
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            const todoItem = this.constructTodoItem(doc.data().text, doc.data().cycles, doc.id);
+            const todoItemDesktop = this.constructTodoItem(doc.data().text, doc.data().cycles, doc.id);
+            const todoItemMobile = this.constructTodoItem(doc.data().text, doc.data().cycles, doc.id);
 
-            todoItem.dataset.todoId = doc.id;
-            this.todoList.appendChild(todoItem);
+            todoItemDesktop.dataset.todoId = doc.id;
+            todoItemMobile.dataset.todoId = doc.id;
+
+            this.todoList.appendChild(todoItemDesktop);
+            this.mobileTodoList.appendChild(todoItemMobile);
           });
         })
         .catch((error) => {
@@ -295,6 +313,10 @@ rhit.mainPageController = class {
         document.body.style.backgroundImage = "url('https://www.commonapp.org/static/0343dfd8aab28ca8d9de4a8010a73c61/rose-hulman-institute-technology_865.jpg')";
         break;
     }
+
+    if (window.matchMedia(`(max-width: ${768}px)`).matches) {
+      document.body.style.backgroundImage = "none";
+    }
   }
 
 
@@ -311,7 +333,7 @@ rhit.mainPageController = class {
       clearInterval(this.intervalId);
       this.playSound('soundEffects/bellRinging.mp3');
 
-    
+
       const todoId = this.todoList.firstElementChild.dataset.todoId;
 
       this.todosCollection.doc(todoId).update({
@@ -379,15 +401,12 @@ rhit.startFirebaseUI = function () {
 
 
 rhit.main = function () {
-  const inputEmailEl = document.querySelector("#inputEmail");
-  const inputPasswordEl = document.querySelector("#inputPassword");
-
   const signOutButton = document.querySelector("#signOutButton");
   if (signOutButton) {
     signOutButton.onclick = (event) => {
       firebase.auth().signOut().then(() => {
         console.log("You are now signed out");
-        window.location.href = "/"; 
+        window.location.href = "/";
         rhit.startFirebaseUI();
       }).catch((error) => {
         console.log("Sign out error:", error);
@@ -419,7 +438,7 @@ rhit.main = function () {
       }
     } else {
       if (!document.querySelector("#loginPage")) {
-        window.location.href = "/"; 
+        window.location.href = "/";
       }
       rhit.startFirebaseUI();
     }
